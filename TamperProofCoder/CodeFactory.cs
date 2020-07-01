@@ -4,6 +4,12 @@ using System.Security.Cryptography;
 
 namespace Willowsoft.TamperProofCoder
 {
+    /// <summary>
+    /// Construct source code for subclasses of TamperProofData.Signer and
+    /// TamperProofData.Validator using a randomly generated private/public
+    /// key pair. Every call to OutputClasses() generates source code with
+    /// new keys.
+    /// </summary>
     public static class CodeFactory
     {
         public static void OutputClasses(TextWriter output)
