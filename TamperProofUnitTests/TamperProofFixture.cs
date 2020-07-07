@@ -87,7 +87,7 @@ namespace TamperProofUnitTests
                 Dictionary<string, string> decodedValues = LicenseReader.Read(licenseStream, new TestValidator());
                 Assert.Fail("Should have thrown exception");
             }
-            catch (InvalidDataException ex)
+            catch (InvalidDataException)
             {
 
             }
@@ -109,7 +109,7 @@ namespace TamperProofUnitTests
                 Dictionary<string, string> decodedValues = LicenseReader.Read(licenseStream, new TestValidator());
                 Assert.Fail("Should have thrown exception");
             }
-            catch (InvalidDataException ex)
+            catch (InvalidDataException)
             {
 
             }
@@ -131,10 +131,74 @@ namespace TamperProofUnitTests
                 Dictionary<string, string> decodedValues = LicenseReader.Read(licenseStream, new TestValidator());
                 Assert.Fail("Should have thrown exception");
             }
-            catch (InvalidDataException ex)
+            catch (InvalidDataException)
             {
 
             }
+        }
+
+        [Test]
+        public void StandardLicenseTest()
+        {
+            Dictionary<string, string> values = StandardLicenseBuilder.Build("to-me", null, "me@gmail.com", "00200", 4);
+            string licenseFolder = System.IO.Path.GetTempPath();
+            string fileName = "UTTest.lic";
+            string filePath = System.IO.Path.Combine(licenseFolder, fileName);
+            using (System.IO.Stream fileStream = new System.IO.FileStream(filePath, FileMode.Create))
+            {
+                LicenseWriter.Write(values, new TestSigner(), fileStream);
+            }
+            IStandardLicense license = new TestLicense();
+            Assert.That(license.Status, Is.EqualTo(LicenseStatus.NotLoaded));
+            license.Load(licenseFolder);
+            Assert.That(license.Status, Is.EqualTo(LicenseStatus.Active));
+            Assert.That(license.LicensedTo, Is.EqualTo("to-me"), "wrong licensedto");
+            Assert.That(license.LicenseTitle, Is.EqualTo("Test License"), "wrong license title");
+            Assert.That(license.ExpirationDate, Is.Null, "Expiration date is not null");
+            Assert.That(license.AttributeSummary, Is.EqualTo("Attribs"), "wrong attribs");
+            Assert.That(license.SerialNumber, Is.EqualTo("00200"), "wrong serial number");
+            Assert.That(license.EmailAddress, Is.EqualTo("me@gmail.com"), "wrong email address");
+            Assert.That(license.LicenseVersion, Is.EqualTo(4), "wrong license version");
+            Assert.That(license.Values[StandardLicenseBuilder.EmailAddressKey], Is.EqualTo("me@gmail.com"), "bad dictionary");
+        }
+
+        [Test]
+        public void StandardLicenseExpired()
+        {
+            Dictionary<string, string> values = StandardLicenseBuilder.Build("to-me", new DateTime(2000, 1, 1), "me@gmail.com", "00200", 4);
+            string licenseFolder = System.IO.Path.GetTempPath();
+            string fileName = "UTTest.lic";
+            string filePath = System.IO.Path.Combine(licenseFolder, fileName);
+            using (System.IO.Stream fileStream = new System.IO.FileStream(filePath, FileMode.Create))
+            {
+                LicenseWriter.Write(values, new TestSigner(), fileStream);
+            }
+            IStandardLicense license = new TestLicense();
+            Assert.That(license.Status, Is.EqualTo(LicenseStatus.NotLoaded));
+            license.Load(licenseFolder);
+            Assert.That(license.Status, Is.EqualTo(LicenseStatus.Expired));
+            Assert.That(license.LicensedTo, Is.EqualTo("to-me"), "wrong licensedto");
+            Assert.That(license.LicenseTitle, Is.EqualTo("Test License"), "wrong license title");
+            Assert.That(license.ExpirationDate, Is.EqualTo(new DateTime(2000,1,1)), "Expiration date is wrong");
+        }
+
+        [Test]
+        public void StandardLicenseNotExpired()
+        {
+            Dictionary<string, string> values = StandardLicenseBuilder.Build("to-me", DateTime.Today.AddDays(1.0D), "me@gmail.com", "00200", 4);
+            string licenseFolder = System.IO.Path.GetTempPath();
+            string fileName = "UTTest.lic";
+            string filePath = System.IO.Path.Combine(licenseFolder, fileName);
+            using (System.IO.Stream fileStream = new System.IO.FileStream(filePath, FileMode.Create))
+            {
+                LicenseWriter.Write(values, new TestSigner(), fileStream);
+            }
+            IStandardLicense license = new TestLicense();
+            Assert.That(license.Status, Is.EqualTo(LicenseStatus.NotLoaded));
+            license.Load(licenseFolder);
+            Assert.That(license.Status, Is.EqualTo(LicenseStatus.Active));
+            Assert.That(license.LicensedTo, Is.EqualTo("to-me"), "wrong licensedto");
+            Assert.That(license.LicenseTitle, Is.EqualTo("Test License"), "wrong license title");
         }
     }
 }

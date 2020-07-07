@@ -15,29 +15,36 @@ namespace Willowsoft.TamperProofData
     {
         public static Dictionary<string, string> Read(Stream input, Validator validator)
         {
-            BinaryReader licenseReader = new BinaryReader(input, Encoding.Unicode);
-            byte[] headerBytes = licenseReader.ReadBytes(LicenseWriter.LicenseHeader.Length);
-            for(int headerIdx = 0; headerIdx < LicenseWriter.LicenseHeader.Length; headerIdx++)
+            try
             {
-                if (headerBytes[headerIdx] != LicenseWriter.LicenseHeader[headerIdx])
-                    throw new InvalidDataException("License has incorrect prefix bytes");
+                BinaryReader licenseReader = new BinaryReader(input, Encoding.Unicode);
+                byte[] headerBytes = licenseReader.ReadBytes(LicenseWriter.LicenseHeader.Length);
+                for (int headerIdx = 0; headerIdx < LicenseWriter.LicenseHeader.Length; headerIdx++)
+                {
+                    if (headerBytes[headerIdx] != LicenseWriter.LicenseHeader[headerIdx])
+                        throw new InvalidDataException("License has incorrect prefix bytes");
+                }
+                int signatureLength = licenseReader.ReadInt32();
+                byte[] signature = licenseReader.ReadBytes(signatureLength);
+                int valueLength = licenseReader.ReadInt32();
+                byte[] valueBytes = licenseReader.ReadBytes(valueLength);
+                if (!validator.IsValid(valueBytes, signature))
+                    throw new InvalidDataException("License data does not match signature");
+                Dictionary<string, string> licenseValues = new Dictionary<string, string>();
+                BinaryReader valueReader = new BinaryReader(new MemoryStream(valueBytes), Encoding.Unicode);
+                int valueCount = valueReader.ReadInt32();
+                for (int valueIdx = 0; valueIdx < valueCount; valueIdx++)
+                {
+                    string key = valueReader.ReadString();
+                    string value = valueReader.ReadString();
+                    licenseValues.Add(key, value);
+                }
+                return licenseValues;
             }
-            int signatureLength = licenseReader.ReadInt32();
-            byte[] signature = licenseReader.ReadBytes(signatureLength);
-            int valueLength = licenseReader.ReadInt32();
-            byte[] valueBytes = licenseReader.ReadBytes(valueLength);
-            if (!validator.IsValid(valueBytes, signature))
-                throw new InvalidDataException("License data does not match signature");
-            Dictionary<string, string> licenseValues = new Dictionary<string, string>();
-            BinaryReader valueReader = new BinaryReader(new MemoryStream(valueBytes), Encoding.Unicode);
-            int valueCount = valueReader.ReadInt32();
-            for(int valueIdx = 0; valueIdx < valueCount; valueIdx++)
+            catch (Exception ex)
             {
-                string key = valueReader.ReadString();
-                string value = valueReader.ReadString();
-                licenseValues.Add(key, value);
+                throw new InvalidDataException("Exception reading signed data", ex);
             }
-            return licenseValues;
         }
     }
 }
