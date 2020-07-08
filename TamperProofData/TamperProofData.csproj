@@ -8,7 +8,8 @@
     <Company>Willow Creek Software</Company>
     <Copyright>Copyright 2020 Willow Creek Software</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
+    <Description>Tools to create RSA signatures for any data, validate those signatures, and work with data files containing those RSA signatures.</Description>
   </PropertyGroup>
 
 </Project>
