@@ -64,6 +64,10 @@ namespace Willowsoft.TamperProofData
 
         public Dictionary<string, string> Values => mValues;
 
+        public abstract string LicenseStatement { get; }
+        public abstract Uri LicenseUrl { get; }
+        public abstract Uri ProductUrl { get; }
+
         public void Load(string licenseFolder)
         {
             string strLicenseFile = System.IO.Path.Combine(licenseFolder, BaseFileName);

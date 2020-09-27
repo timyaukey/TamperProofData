@@ -67,6 +67,21 @@ namespace Willowsoft.TamperProofData
         string AttributeSummary { get; }
 
         /// <summary>
+        /// The text of the license grant.
+        /// </summary>
+        string LicenseStatement { get; }
+
+        /// <summary>
+        /// URL of page or website where a license file may be obtained.
+        /// </summary>
+        Uri LicenseUrl { get; }
+
+        /// <summary>
+        /// URL of page or website where product information may be obtained.
+        /// </summary>
+        Uri ProductUrl { get; }
+
+        /// <summary>
         /// A dictionary containing all license attributes, including the ones
         /// exposed by other IStandardLicense properties.
         /// </summary>

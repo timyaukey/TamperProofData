@@ -13,5 +13,11 @@ namespace TamperProofUnitTests
         public override string LicenseTitle => "Test License";
 
         public override string AttributeSummary => "Attribs";
+
+        public override string LicenseStatement => "License statement text";
+
+        public override Uri LicenseUrl => new Uri("http://microsoft.com/license");
+
+        public override Uri ProductUrl => new Uri("Http://google.com");
     }
 }
